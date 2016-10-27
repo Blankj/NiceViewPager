@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_vertical_margin"
+    android:clipChildren="false"
+    tools:context="com.blankj.vpdemo.MainActivity">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginLeft="160dp"
+        android:layout_marginRight="160dp"
+        android:layout_gravity="center">
+
+    </android.support.v4.view.ViewPager>
+</FrameLayout>
