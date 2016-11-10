@@ -1,9 +1,9 @@
 package com.blankj.vpdemo;
 
+import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +20,12 @@ public class MainActivity extends AppCompatActivity
     private ViewPager       vp;
     private FrameLayout     fl;
     private List<ImageView> mViews;
+
+    // 数据源长度
+    private int len;
+
+    // 倍数因子，数据源的倍数
+    private int factor = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +45,8 @@ public class MainActivity extends AppCompatActivity
                 R.drawable.img7,
                 R.drawable.img8
         };
-        int len = ids.length;
+
+        len = ids.length;
         mViews = new ArrayList<>();
         ImageView iv;
         // 插入最后一张
@@ -61,7 +68,8 @@ public class MainActivity extends AppCompatActivity
         vp.setAdapter(adapter);
         // 当前页前后缓存页为3即可，即缓存当前项的前三页和后三页效果比较好
         vp.setOffscreenPageLimit(3);
-        vp.setCurrentItem(1);
+        // 使其显示在中间
+        vp.setCurrentItem(len * (factor / 2) + 1);
         vp.setPageTransformer(true, new CustomPageTransformer());
         vp.addOnPageChangeListener(this);
 
@@ -83,17 +91,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPageSelected(int position) {
-        Log.d("cmj", "onPageSelectedPos: " + position);
-        if (mViews.size() > 3) {
-            if (position <= 0) {
-                // 当滑动到第一张的时候，让它跳转到倒数第二张，false为关闭smoothScroll
-                vp.setCurrentItem(mViews.size() - 2, false);
-            } else if (position >= mViews.size() - 1) {
-                // 当滑动到最后一张的时候，让它跳转到第二张，，false为关闭smoothScroll
-                vp.setCurrentItem(1, false);
-            }
-        }
-        fl.invalidate();
+//        Log.d("cmj", "onPageSelectedPos: " + position);
+//        if (mViews.size() > 3) {
+//            if (position <= 0) {
+//                // 当滑动到vp的第一张的时候，其实显示的是最后一张
+//                // 让它跳转到中间的倒数第二张，这样再划回去也就不生硬了
+//                position = len * (factor / 2) + len;
+//                // false为关闭smoothScroll
+//                vp.setCurrentItem(position, false);
+//            } else if (position >= len * factor + 1) {
+//                // 当滑动到最后一张的时候，其实显示的是第一张
+//                // 让它跳转到中间的第二张，这样再划回去也就不生硬了
+//                position = len * (factor / 2) + 1;
+//                // false为关闭smoothScroll
+//                vp.setCurrentItem(position, false);
+//            }
+//        }
+//        fl.invalidate();
     }
 
     @Override
@@ -104,14 +118,43 @@ public class MainActivity extends AppCompatActivity
     class VpAdapter extends PagerAdapter {
 
         @Override
+        public void finishUpdate(ViewGroup container) {
+            int position = vp.getCurrentItem();
+            Log.d("cmj", "finishUpdate: " + position);
+            if (mViews.size() > 3) {
+                if (position <= 0) {
+                    // 当滑动到vp的第一张的时候，无动画地切换到最后一张
+                    position = len * factor + len;
+                    // false为关闭smoothScroll
+                    vp.setCurrentItem(position, false);
+                } else if (position >= len * factor + 1) {
+                    // 当滑动到vp最后一张的时候，无动画地切换到第一张
+                    position = 1;
+                    // false为关闭smoothScroll
+                    vp.setCurrentItem(position, false);
+                }
+            }
+        }
+
+        @Override
         public int getCount() {
-            return mViews.size();
+            // 个数为原先的个数的factor倍再加首位两个
+            return len * factor + 2;
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            container.addView(mViews.get(position));
-            return mViews.get(position);
+            Log.d("cmj", "pos: " + position);
+            View view;
+            if (position == 0) {
+                view = mViews.get(0);
+            } else if (position == len * factor + 1) {
+                view = mViews.get(len + 1);
+            } else {
+                view = mViews.get((position - 1) % len + 1);
+            }
+            container.addView(view);
+            return view;
         }
 
         @Override
