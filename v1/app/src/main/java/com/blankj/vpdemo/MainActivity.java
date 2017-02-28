@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager       vp;
     private FrameLayout     fl;
     private List<ImageView> mViews;
+    private int             currentPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,22 +85,20 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPageSelected(int position) {
-        Log.d("cmj", "onPageSelectedPos: " + position);
-        if (mViews.size() > 3) {
-            if (position <= 0) {
-                // 当滑动到第一张的时候，让它跳转到倒数第二张，false为关闭smoothScroll
-                vp.setCurrentItem(mViews.size() - 2, false);
-            } else if (position >= mViews.size() - 1) {
-                // 当滑动到最后一张的时候，让它跳转到第二张，，false为关闭smoothScroll
-                vp.setCurrentItem(1, false);
-            }
-        }
-        fl.invalidate();
+
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
+        if (state == ViewPager.SCROLL_STATE_IDLE) {
+            int curr = vp.getCurrentItem();
+            int lastReal = vp.getAdapter().getCount() - 2;
+            if (curr == 0) {
+                vp.setCurrentItem(lastReal, false);
+            } else if (curr > lastReal) {
+                vp.setCurrentItem(1, false);
+            }
+        }
     }
 
     class VpAdapter extends PagerAdapter {
